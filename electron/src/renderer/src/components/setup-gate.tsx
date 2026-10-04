@@ -67,7 +67,13 @@ export function SetupGate({ children }: { children: ReactNode }) {
   });
   useEffect(() => {
     if (needed !== null || !status.data) return;
-    const completed = setupWasCompleted();
+    // Colab's launcher downloads required models before exposing the app.
+    // This opt-in web build avoids repeating device setup on each proxy URL.
+    const completed =
+      setupWasCompleted() ||
+      (__WEB_DEPLOYMENT__ &&
+        import.meta.env.VITE_TTS_PROMAX_QUICK_START === '1' &&
+        status.data.models_ready === true);
     if (!setupInProgress && !completed) {
       // This marker belongs to the Electron shell. A populated shared model
       // cache does not prove that this installation has completed permissions,
